@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>Game Dev sucks Money</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    
+    <link rel='stylesheet prefetch' href='https://cdn.jsdelivr.net/foundation/5.5.0/css/foundation.css'>
+
+        <link rel="stylesheet" href="css/style.css">
+
+    
+    
+    
+  </head>
+
+  <body>
+
+    <html lang="en" ng-app="app">
+
+<body ng-controller="MainCtrl">
+  <div>
+    <h2>Game Development sucks Money</h2>
+    <h4>A minigame by <a href="http://www.reddit.com/u/dSolver" target="_blank">dSolver</a></h4>
+
+    <div ng-hide="started">
+      <h4>Starting Conditions</h4>
+      <div class="col-3">
+        <div>
+          <label>Money: {{curDollar | currency}}</label>
+          <input type="range" min=1000 max=100000 ng-model="curDollar">
+        </div>
+        <div>
+          <label>Expected ROI: {{roi*100 | number:0}}%</label>
+          <input type="range" min=0.8 max=2 ng-model="roi" step=0.01>
+        </div>
+        <div>
+          <label>Variance: {{variance*100 | number:0}}%</label>
+          <input type="range" min=0.2 max=1 ng-model="variance" step=0.01>
+        </div>
+
+        <div>
+          <input type="checkbox" ng-model="recurringSalesOn" id="recurringSales">
+          <label for="recurringSales">Recurring Sales</label>
+        </div>
+      </div>
+      <div>
+        <button ng-click="start()"> Start</button>
+      </div>
+    </div>
+    <div ng-show="started">
+      <div>
+        <h4 ng-class="{negative:curDollar < 0}">Money: {{curDollar | currency}}</h4>
+      </div>
+      <div ng-hide="requestName">
+        <button ng-repeat="tier in tiers" ng-click="makeGame($index)" ng-show="curDollar > costs[$index]*0.1" ng-disabled="curProject || curDollar < costs[$index]*0.1"> Make {{tier}} (${{costs[$index]}}) </button>
+      </div>
+      <div ng-show="requestName">
+        <label>Name your game:</label>
+        <input type="text" ng-model="name">
+        <button ng-click="setProject()">Start Project</button>
+      </div>
+      <div ng-show="curProject">
+        {{curProject.name}} Progress:
+      </div>
+      <div class="progress" ng-show="curProject">
+        <div class="meter" style="width:{{curProject.progress*100/curProject.max}}%"></div>
+      </div>
+
+      <div ng-show="curProject">
+        <button ng-click="boost()">Throw ${{costs[curProject.tier]*0.1}} at project</button>
+      </div>
+      <div class="bottom">
+        <div>
+          <div ng-repeat="msg in log track by $index">{{msg}}</div>
+        </div>
+
+        <div>
+          <div ng-repeat="game in games">
+            <label ng-bind="game.name"></label>
+            Initial sales: {{game.sales | currency}}
+            <br> Total sales: {{game.recurringSales + game.sales | currency}}
+            <br> Consumer Awareness: {{game.awareness * 100 | number:0}}%
+            <br>
+            <button ng-click="boostAwareness(game)">Ad Campaign (${{game.sales/3 | number:0}})</button>
+          </div>
+        </div>
+
+        <div ng-show="started">
+          <div style="font-size:16px; text-align:center; margin: 20px 0; height:237px" flex="100" class="blockchain-btn" data-address="1NmaXr2aKEshE25sUDLb9y9q4FYz4RCkLZ" data-shared="false" layout-align="center center">
+            <div class="blockchain stage-begin" ng-click="giveMoney(100)">
+              <img src="https://blockchain.info//Resources/buttons/donate_64.png" />
+            </div>
+            <div class="blockchain stage-loading" style="text-align:center">
+              <img src="https://blockchain.info//Resources/loading-large.gif" />
+            </div>
+            <div class="blockchain stage-ready">
+              <p align="center"><b>1NmaXr2aKEshE25sUDLb9y9q4FYz4RCkLZ</b></p>
+              <p align="center" class="qr-code"></p>
+            </div>
+            <div class="blockchain stage-paid" ng-click="giveMoney(1000000000)">
+              Donation of <b>{{value}} BTC</b> Received. Click here for a mega boost of $1,000,000,000
+            </div>
+            <div class="blockchain stage-error">
+              <font color="red">{{error}}</font>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div ng-show="gameOver" class="modal">
+      <h3>Welp, looks like you don't have enough funds to make any more games. With only {{curDollar | number:2 }} in your name, better find alternative income sources.</h3>
+      <h4>Refresh the browser to try again. Feel free to <a href="http://codepen.io/dSolver/pen/vOJayZ/" target="_blank">fork and modify</a> this game to your taste.</h4>
+      <h4>If you like this, check out <a href="http://www.prosperity.ga" target="_blank">Prosperity</a> (<a href="http://www.reddit.com/r/ProsperityGame" target="_blank">/r/ProsperityGame</a>)</h4>
+    </div>
+
+</body>
+
+</html>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://blockchain.info//Resources/wallet/pay-now-button.js'></script>
+
+        <script src="js/index.js"></script>
+
+    
+    
+    
+  </body>
+</html>

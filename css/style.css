@@ -1,0 +1,48 @@
+div{
+  margin: 1em
+}
+.progress{
+  margin: 1em
+}
+.meter{
+  margin: 0;
+  transition: all 1s linear;
+}
+
+.negative{
+  color: #DD0000
+}
+
+button{
+  margin: 1em;
+}
+
+.modal{
+  position:fixed;
+  top: 0;
+  left:0;
+  bottom:0;
+  right:0;
+  background:white;
+  color:white;
+  margin: 0;
+  padding: 1em;
+}
+
+.bottom{
+  display:flex;
+  flex-direction:horizontal;
+}
+
+.bottom>div{
+  flex:1
+}
+
+.col-3{
+  display:flex;
+  flex-direction:horizontal;
+}
+
+.col-3>div{
+  flex:1
+}
