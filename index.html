@@ -44,7 +44,7 @@
         <h4 ng-class="{negative:curDollar < 0}">Money: {{curDollar | currency}}</h4>
       </div>
       <div ng-hide="requestName">
-        <button ng-repeat="tier in tiers" ng-click="makeGame(tier)" ng-show="curDollar > tier.cost*0.1" ng-disabled="curProject || curDollar < tier.cost*0.1"> Make {{tier.name}} (${{tier.cost}}) </button>
+        <button ng-repeat="tier in tiers" ng-click="makeGame(tier)" ng-disabled="curProject || curDollar < tier.cost*0.1"> Make {{tier.name}} (${{tier.cost}}) </button>
       </div>
       <div ng-show="requestName">
         <label>Name your game:</label>

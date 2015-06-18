@@ -9,43 +9,67 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	
 	$scope.allTiers = [
 		{
-			name: "Small Game",
+			name: "Indie Game",
 			cost: 1000,
 			time: 20,
-			initialAwareness: 0.2
+			initialAwareness: 0.2,
+			unlockRequirement: null
+		},
+		{
+			name: "Small Game",
+			cost: 5000,
+			time: 30,
+			initialAwareness: 0.3,
+			unlockRequirement: null
 		},
 		{
 			name: "Medium Game",
 			cost: 20000,
 			time: 100,
-			initialAwareness: 0.4
+			initialAwareness: 0.4,
+			unlockRequirement: null
 		},
 		{
 			name: "Large Game",
 			cost: 130000,
 			time: 500,
-			initialAwareness: 0.6
+			initialAwareness: 0.6,
+			unlockRequirement: "cost"
 		},
 		{
 			name: "Epic Game",
 			cost: 2000000,
 			time: 800,
-			initialAwareness: 0.8
+			initialAwareness: 0.8,
+			unlockRequirement: "cost"
 		},
 		{
 			name: "Legendary Game",
 			cost: 40000000,
 			time: 1200,
-			initialAwareness: 1
+			initialAwareness: 1,
+			unlockRequirement: "success"
 		}
 	];
 	$scope.tiers = [];
 
-  // plumbing for tier unlocks over time
 	function initializeTiers() {
 		$scope.tiers = [];
-		for(var i = 0; i <= $scope.allTiers.length; i++) {
-			$scope.tiers.push($scope.allTiers[i]);
+		for(var i = 0; i < $scope.allTiers.length; i++) {
+		  var tier = $scope.allTiers[i];
+
+		  if(tier.unlockRequirement === null){
+		    $scope.tiers.push(tier);
+		  }
+		  else if(tier.unlockRequirement === "cost") {
+		    if($scope.curDollar > tier.cost*0.1) {
+		      $scope.tiers.push(tier);
+		    }
+		  }
+		  else if(tier.unlockRequirement === "success") {
+		    // add success criteria
+		  }
+
 		}
 	}
 	initializeTiers();
@@ -137,6 +161,7 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 					performance = performances[5];
 				}
 
+        reward = Math.round(reward);
 				$scope.curDollar += reward;
 				var game = {
 					name: $scope.curProject.name,
