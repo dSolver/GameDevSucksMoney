@@ -120,12 +120,18 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	
 	$scope.boostAwareness = function(game){
 		$scope.curDollar -= Math.round(game.sales/3);
-		game.awareness += Math.floor(Math.random()*5)/10 + 0.1;
+		game.awareness += randInt(10, 50)/100;
 		if(game.awareness > 1){
 			game.awareness = 1;
 		}
 	}
 	$interval(gameTick, 1000);
+	
+	function randInt(min, max) {
+	  if(!min) min = 0;
+	  if(!max) max = 100;
+	  return Math.floor(Math.random() * (max - min) + min);
+	}
 
 	function gameTick() {
 		var oldDollar = $scope.curDollar;
@@ -135,9 +141,9 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 				$scope.games[$scope.curProject.tier];
 				var investment = $scope.curProject.tier.cost;
 
-				var reward = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
+				var initialSales = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
 
-				var ratio = reward / investment;
+				var ratio = initialSales / investment;
 				var performances = [
     				"dismally",
     				"pretty bad",
@@ -160,18 +166,21 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 				} else {
 					performance = performances[5];
 				}
-
-        reward = Math.round(reward);
-				$scope.curDollar += reward;
+				
+        initialSales = Math.round(initialSales);
+				$scope.curDollar += initialSales;
 				var game = {
 					name: $scope.curProject.name,
-					sales: reward,
+					sales: initialSales,
 					recurringSales: 0,
-					awareness: $scope.curProject.tier.initialAwareness
+					awareness: $scope.curProject.tier.initialAwareness,
+					releaseSales: initialSales,
+					releaseAwareness: $scope.curProject.tier.initialAwareness,
+					releasePerformance: performance
 				}
 
 				$scope.games.push(game);
-				$scope.log.unshift("Your " + $scope.curProject.tier.name + ", " + $scope.curProject.name + "  performed " + performance + ", it made $" + reward);
+				$scope.log.unshift("Your " + $scope.curProject.tier.name + ", " + $scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
 				$scope.curProject = null;
 
 			}
@@ -180,7 +189,7 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 		if ($scope.games.length > 0 && $scope.recurringSalesOn) {
 			angular.forEach($scope.games, function(game, index) {
 				if (game.awareness > 0) {
-					var recurringsale = game.sales / 10 * game.awareness;
+					var recurringsale = game.releaseSales / 10 * game.awareness;
 
 					$scope.curDollar += recurringsale;
 					game.recurringSales += recurringsale;
@@ -201,4 +210,10 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 			}, 2500);
 		}
 	}
+});
+
+app.filter('reverse', function() {
+  return function(items) {
+    return items.slice().reverse();
+  };
 });

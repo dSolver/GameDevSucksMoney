@@ -67,7 +67,7 @@
         </div>
 
         <div>
-          <div ng-repeat="game in games">
+          <div ng-repeat="game in games | reverse">
             <label ng-bind="game.name"></label>
             Initial sales: {{game.sales | currency}}
             <br> Total sales: {{game.recurringSales + game.sales | currency}}
