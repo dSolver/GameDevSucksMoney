@@ -204,77 +204,85 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 		}
 		return performance;
 	}
-
+	
 	function gameTick() {
 	  $scope.timer.gameSpeedCounter += $scope.timer.gameSpeed;
 	  while($scope.timer.gameSpeedCounter >= 1) {
 	    $scope.timer.gameSpeedCounter--;
 	    
-  		var oldDollar = $scope.curDollar;
   		$scope.timer.progressCounter++;
   		while($scope.timer.progressCounter >= $scope.timer.progressMax) {
   		  $scope.timer.progressCounter -= $scope.timer.progressMax;
-  		  
-    		if ($scope.curProject) {
-    			$scope.curProject.progress += 0.1;
-    			if ($scope.curProject.progress >= $scope.curProject.max) {
-    				$scope.games[$scope.curProject.tier];
-
-    				var investment = $scope.curProject.investment;
-    				var initialSales = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
-    				var performance = getReleaseProjectPerformance(initialSales, investment);
-    
-            initialSales = Math.round(initialSales);
-    				$scope.curDollar += initialSales;
-    				
-    				var game = {
-    					name: $scope.curProject.name,
-    					sales: initialSales,
-    					recurringSales: 0,
-    					awareness: $scope.curProject.tier.initialAwareness,
-    					releaseSales: initialSales,
-    					releaseAwareness: $scope.curProject.tier.initialAwareness,
-    					releasePerformance: performance
-    				}
-    
-    				$scope.games.push(game);
-    				$scope.log.unshift("Your " + $scope.curProject.tier.name + ", " + $scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
-    				$scope.curProject = null;
-    
-    			}
-    		}
+  		  tickProjectProgress();
   		}
   
   		$scope.timer.awarenessCounter++;
   		while($scope.timer.awarenessCounter >= $scope.timer.awarenessMax) {
   		  $scope.timer.awarenessCounter -= $scope.timer.awarenessMax;
-  		  
-    		if ($scope.games.length > 0 && $scope.recurringSalesOn) {
-    			angular.forEach($scope.games, function(game, index) {
-    				if (game.awareness > 0) {
-    					var recurringsale = game.releaseSales / 20 * game.awareness;
-    
-    					$scope.curDollar += recurringsale;
-    					game.recurringSales += recurringsale;
-    
-    					game.awareness -= randDec(0.005,0.015);
-    
-    					if (game.awareness < 0) {
-    						game.awareness = 0;
-    					}
-    				}
-    
-    			});
-    		}
+  		  tickGameAwareness();
   		}
   
-  		if ($scope.curDollar === oldDollar && $scope.games.length > 0 && $scope.curDollar < $scope.tiers[0].cost * 0.1) {
+  		var oldDollar = $scope.curDollar;
+  		if (!$scope.curProject && $scope.curDollar === oldDollar && $scope.games.length > 0 && $scope.curDollar < $scope.tiers[0].cost * 0.1) {
   			$timeout(function() {
   				$scope.gameOver = true;
   			}, 2500);
   		}
 	  }
 	}
+
+	function tickProjectProgress() {
+		if ($scope.curProject) {
+			$scope.curProject.progress += 0.1;
+			if ($scope.curProject.progress >= $scope.curProject.max) {
+				$scope.games[$scope.curProject.tier];
+
+				var investment = $scope.curProject.investment;
+				var initialSales = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
+				var performance = getReleaseProjectPerformance(initialSales, investment);
+
+        initialSales = Math.round(initialSales);
+				$scope.curDollar += initialSales;
+				
+				var game = {
+					name: $scope.curProject.name,
+					sales: initialSales,
+					recurringSales: 0,
+					awareness: $scope.curProject.tier.initialAwareness,
+					releaseSales: initialSales,
+					releaseAwareness: $scope.curProject.tier.initialAwareness,
+					releasePerformance: performance
+				}
+
+				$scope.games.push(game);
+				$scope.log.unshift("Your " + $scope.curProject.tier.name + ", " + $scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
+				$scope.curProject = null;
+
+			}
+		}
+	}
+	
+	function tickGameAwareness() {
+		if ($scope.games.length > 0 && $scope.recurringSalesOn) {
+			angular.forEach($scope.games, function(game, index) {
+				if (game.awareness > 0) {
+					var recurringsale = game.releaseSales / 20 * game.awareness;
+
+					$scope.curDollar += recurringsale;
+					game.recurringSales += recurringsale;
+
+					game.awareness -= randDec(0.005,0.015);
+
+					if (game.awareness < 0) {
+						game.awareness = 0;
+					}
+				}
+
+			});
+		}
+	}
+
+
 });
 
 app.filter('reverse', function() {
