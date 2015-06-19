@@ -298,7 +298,9 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   					scope.curDollar += recurringsale;
   					game.recurringSales += recurringsale;
   
-  					game.awareness -= randDec(0.005,0.015);
+            var value = randDec(0.005,0.015) * (1.7-game.awareness); // lose more awareness once your popularity starts to fall off
+            console.log("Losing " + value + " awareness with " + (1.7-game.awareness) + " penalty");
+  					game.awareness -= value;
   
   					if (game.awareness < 0) {
   						game.awareness = 0;
