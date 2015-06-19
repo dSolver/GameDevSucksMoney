@@ -56,7 +56,7 @@
       <div ng-show="requestName">
         <label>Name your game:</label>
         <input type="text" ng-model="name">
-        <button ng-click="setProject()">Start Project</button>
+        <button ng-click="startProject()">Start Project</button>
       </div>
       <div ng-show="curProject">
         {{curProject.name}} Progress:
@@ -66,21 +66,25 @@
       </div>
 
       <div ng-show="curProject">
-        <button ng-click="boost()">Throw ${{curProject.tier.cost*0.1}} at project</button>
+        <button ng-click="boostDevelopmentSpeed()">Throw ${{curProject.speedCost}} at speed</button>
+        <button ng-click="boostReleaseQuality()">Throw ${{curProject.qualityCost}} at quality</button>
+        <button ng-click="boostReleaseAwareness()">Generate hype! ${{curProject.advertisingCost}}</button>
       </div>
       <div class="bottom">
         <div>
-          <div ng-repeat="msg in log track by $index">{{msg}}</div>
+          <span ng-repeat="msg in log track by $index">{{msg}}<br></span>
         </div>
 
         <div>
           <div ng-repeat="game in games | reverse">
             <label ng-bind="game.name"></label>
-            Initial sales: {{game.sales | currency}}
-            <br> Total sales: {{game.recurringSales + game.sales | currency}}
-            <br> Consumer Awareness: {{game.awareness * 100 | number:0}}%
-            <br>
-            <button ng-click="boostAwareness(game)">Ad Campaign (${{game.sales/3 | number:0}})</button>
+            Quality: {{game.quality}} <br>
+            Initial sales: {{game.releaseSales | currency}} <br>
+            Initial investment: {{game.releaseInvestment | currency}} <br>
+            Total sales: {{game.recurringSales + game.sales | currency}} <br>
+            Total investment: {{game.investment | currency}} <br>
+            Consumer Awareness: {{game.awareness * 100 | number:0}}% <br>
+            <button ng-click="boostAwareness(game)">Ad Campaign (${{game.investment/5 | number:0}})</button>
           </div>
         </div>
 
