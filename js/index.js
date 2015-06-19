@@ -70,7 +70,7 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   	start: function() {
   	  scope.curDollar = 4200;
   	  scope.roi = 0.8;
-  	  scope.variance = 0.7;
+  	  scope.variance = 0.4;
   		scope.started = true;
   	},
   
@@ -97,13 +97,23 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   			name: scope.name,
   			tier: scope.curTier,
   			investment: scope.curTier.cost,
+  			investmentReturn: scope.curTier.cost,
   			progress: 0,
-  			max: scope.curTier.time
+  			max: scope.curTier.time,
+  			quality: 0.70,
+  			releaseAwareness: scope.curTier.initialAwareness,
+  			advertisingCost: scope.curTier.cost * 0.17,
+  			qualityCost: scope.curTier.cost * 0.20,
+  			speedCost: scope.curTier.cost * 0.10
   		}
   	},
   
-  	boost: function() {
-  		var cost = scope.curProject.tier.cost * 0.1;
+  	changeGameSpeed: function(val) {
+  	  scope.timer.gameSpeed = val;
+  	},
+  
+  	boostDevelopmentSpeed: function() {
+  		var cost = scope.curProject.speedCost;
   		if(scope.curDollar < cost) {
   		  return false;
   		}
@@ -123,17 +133,44 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   		result = Math.round(result / scope.curProject.max * 100);
   		msg += " (" + result + "%)";
   		scope.curDollar -= cost
-  		scope.curProject.investment += cost/2; // managers trying to speed up development isn't as worthwhile
+  		scope.curProject.speedCost += Math.round(cost * 0.20);
+  		scope.curProject.investment += cost;
+  		scope.curProject.investmentReturn += cost/2; // managers trying to speed up development isn't as worthwhile
   		scope.log.unshift(msg);
   	},
   	
-  	changeGameSpeed: function(val) {
-  	  scope.timer.gameSpeed = val;
+  	boostReleaseAwareness: function() {
+  	  var cost = scope.curProject.advertisingCost;
+  	  if(scope.curDollar < cost) { return false; }
+  	  scope.curDollar -= cost;
+  		scope.curProject.advertisingCost += Math.round(cost * 0.40);
+  		scope.curProject.investment += cost;
+  		scope.curProject.investmentReturn += 0;
+  	  var value = randDec(0.1,0.4);
+  	  scope.curProject.releaseAwareness += value;
+  	  scope.curProject.releaseAwareness = Math.min(scope.curProject.releaseAwareness, 1);
+  	  console.log("Awareness improved by " + value + " to " + scope.curProject.releaseAwareness);
+  	  scope.log.unshift("You spent $" + cost + " on pre-release advertising.");
   	},
-  
+  	
+  	boostReleaseQuality: function() {
+  	  var cost = scope.curProject.qualityCost;
+  	  if(scope.curDollar < cost) { return false; }
+  	  scope.curDollar -= cost;
+  		scope.curProject.qualityCost += Math.round(cost * 0.30);
+  		scope.curProject.investment += cost;
+  		scope.curProject.investmentReturn += cost;
+  	  var value = randDec(0, 0.15);
+  	  scope.curProject.quality += value;
+  	  console.log("Quality improved by " + value + " to " + scope.curProject.quality);
+  	  scope.log.unshift("You spent $" + cost + " on improving quality.");
+  	},
+  	
   	boostAwareness: function(game){
-  		scope.curDollar -= Math.round(game.sales/3);
-  		game.awareness += randInt(10, 50)/100;
+  	  var cost = Math.round(game.releaseInvestment/5 + (game.investment - game.releaseInvestment)/10);
+  		scope.curDollar -= cost;
+  		game.investment += cost;
+  		game.awareness += randInt(10, 40)/100 + game.awareness/10;
   		if(game.awareness > 1){
   			game.awareness = 1;
   		}
@@ -159,8 +196,8 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   		}
   	},
   
-  	getReleaseProjectPerformance: function(initialSales, investment) {
-  		var ratio = initialSales / investment;
+  	getReleaseProjectPerformance: function(initialSales, investment, quality) {
+  		var ratio = initialSales / investment * quality;
   		
   		var performances = [
   				"dismally",
@@ -219,25 +256,31 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   		if (scope.curProject) {
   			scope.curProject.progress += 0.1;
   			if (scope.curProject.progress >= scope.curProject.max) {
-  				scope.games[scope.curProject.tier];
-  
-  				var investment = scope.curProject.investment;
-  				var initialSales = investment * (1 - scope.variance) + Math.ceil(Math.random() * investment * ((scope.variance) * 2 * scope.roi));
-  				var performance = scope.getReleaseProjectPerformance(initialSales, investment);
-  
+  				var investmentReturn = scope.curProject.investmentReturn;
+  				var quality = scope.curProject.quality * (1 - scope.variance) + Math.random() * scope.curProject.quality * ((scope.variance) * 2);
+  				console.log("Game quality is " + quality);
+  				var initialSales = investmentReturn * quality * scope.roi;
+  				var performance = scope.getReleaseProjectPerformance(initialSales, investmentReturn, quality);
+  				var initialAwareness = Math.min(1, scope.curProject.releaseAwareness * quality);
           initialSales = Math.round(initialSales);
-  				scope.curDollar += initialSales;
-  				
+
   				var game = {
   					name: scope.curProject.name,
+  					investment: scope.curProject.investment,
+  					investmentReturn: investmentReturn,
   					sales: initialSales,
+  					quality: Math.round(quality*314.159),
+  					qualityPercent: quality,
   					recurringSales: 0,
-  					awareness: scope.curProject.tier.initialAwareness,
+  					awareness: initialAwareness,
+  					releaseInvestment: scope.curProject.investment,
   					releaseSales: initialSales,
-  					releaseAwareness: scope.curProject.tier.initialAwareness,
+  					releaseAwareness: initialAwareness,
   					releasePerformance: performance
-  				}
-  
+  				};
+  				
+  				scope.curDollar += initialSales;
+  				
   				scope.games.push(game);
   				scope.log.unshift("Your " + scope.curProject.tier.name + ", " + scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
   				scope.curProject = null;
