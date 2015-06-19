@@ -261,7 +261,12 @@ app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $
   						game.awareness = 0;
   					}
   				}
-  
+  				else {
+  				  // trickle funds in for games still sold
+  				  if(randInt(1, 5) == 1) {
+  				    game.awareness += randDec(0.005,0.015);
+  				  }
+  				}
   			});
   		}
   	}
