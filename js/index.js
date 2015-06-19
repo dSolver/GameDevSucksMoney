@@ -1,7 +1,7 @@
 var app = angular.module('app', []);
 
-app.controller("MainCtrl", function($scope, $interval, $timeout) {
-  angular.extend($scope, {
+app.controller("MainCtrl", ['$scope', '$interval', '$timeout', function(scope, $interval, $timeout) {
+  angular.extend(scope, {
     curDollar: 1000,
     roi: 0.8,
     variance: 0.7,
@@ -66,50 +66,50 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
   	name: ""
   });
   
-  angular.extend($scope, {
+  angular.extend(scope, {
   	start: function() {
-  	  $scope.curDollar = 4200;
-  	  $scope.roi = 0.8;
-  	  $scope.variance = 0.7;
-  		$scope.started = true;
+  	  scope.curDollar = 4200;
+  	  scope.roi = 0.8;
+  	  scope.variance = 0.7;
+  		scope.started = true;
   	},
   
   	makeGame: function(tier) {
-  		if($scope.curDollar < tier.cost) {
+  		if(scope.curDollar < tier.cost) {
   			return false;
   		}
-  		$scope.curDollar -= tier.cost;
+  		scope.curDollar -= tier.cost;
   
-  		$scope.requestName = true;
-  		$scope.name = "";
-  		$scope.curTier = tier;
+  		scope.requestName = true;
+  		scope.name = "";
+  		scope.curTier = tier;
   	},
   	
   	giveMoney: function(amount){
-  		$scope.curDollar += amount;
+  		scope.curDollar += amount;
   		
-  		$scope.log.push("dSolver thanks you for thinking about him, and rewarded you with $"+amount);
+  		scope.log.push("dSolver thanks you for thinking about him, and rewarded you with $" + amount);
   	},
   	
   	startProject: function() {
-  		$scope.requestName = false;
-  		$scope.curProject = {
-  			name: $scope.name,
-  			tier: $scope.curTier,
-  			investment: $scope.curTier.cost,
+  		scope.requestName = false;
+  		scope.curProject = {
+  			name: scope.name,
+  			tier: scope.curTier,
+  			investment: scope.curTier.cost,
   			progress: 0,
-  			max: $scope.curTier.time
+  			max: scope.curTier.time
   		}
   	},
   
   	boost: function() {
-  		var cost = $scope.curProject.tier.cost * 0.1;
-  		if($scope.curDollar < cost) {
+  		var cost = scope.curProject.tier.cost * 0.1;
+  		if(scope.curDollar < cost) {
   		  return false;
   		}
   		
       var msg = "You spent $" + cost + " to speed up development time, it ";
-  		var max = Math.floor($scope.curProject.max / 10);
+  		var max = Math.floor(scope.curProject.max / 10);
   		var result = randDec(-max/4, max);
   		if(result >= max/2) {
   		  msg += "went fantastic!";
@@ -119,20 +119,20 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
   		  msg += "went disastrously.";
   		}
   
-  		$scope.curProject.progress += result;
-  		result = Math.round(result / $scope.curProject.max * 100);
+  		scope.curProject.progress += result;
+  		result = Math.round(result / scope.curProject.max * 100);
   		msg += " (" + result + "%)";
-  		$scope.curDollar -= cost
-  		$scope.curProject.investment += cost/2; // managers trying to speed up development isn't as worthwhile
-  		$scope.log.unshift(msg);
+  		scope.curDollar -= cost
+  		scope.curProject.investment += cost/2; // managers trying to speed up development isn't as worthwhile
+  		scope.log.unshift(msg);
   	},
   	
   	changeGameSpeed: function(val) {
-  	  $scope.timer.gameSpeed = val;
+  	  scope.timer.gameSpeed = val;
   	},
   
   	boostAwareness: function(game){
-  		$scope.curDollar -= Math.round(game.sales/3);
+  		scope.curDollar -= Math.round(game.sales/3);
   		game.awareness += randInt(10, 50)/100;
   		if(game.awareness > 1){
   			game.awareness = 1;
@@ -140,16 +140,16 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
   	},
   	
   	initializeTiers: function() {
-  		$scope.tiers = [];
-  		for(var i = 0; i < $scope.allTiers.length; i++) {
-  		  var tier = $scope.allTiers[i];
+  		scope.tiers = [];
+  		for(var i = 0; i < scope.allTiers.length; i++) {
+  		  var tier = scope.allTiers[i];
   
   		  if(tier.unlockRequirement === null){
-  		    $scope.tiers.push(tier);
+  		    scope.tiers.push(tier);
   		  }
   		  else if(tier.unlockRequirement === "cost") {
-  		    if($scope.curDollar > tier.cost*0.1) {
-  		      $scope.tiers.push(tier);
+  		    if(scope.curDollar > tier.cost*0.1) {
+  		      scope.tiers.push(tier);
   		    }
   		  }
   		  else if(tier.unlockRequirement === "success") {
@@ -189,70 +189,70 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
   	},
   	
   	gameTick: function() {
-  	  $scope.timer.gameSpeedCounter += $scope.timer.gameSpeed;
-  	  while($scope.timer.gameSpeedCounter >= 1) {
-  	    $scope.timer.gameSpeedCounter--;
+  	  scope.timer.gameSpeedCounter += scope.timer.gameSpeed;
+  	  while(scope.timer.gameSpeedCounter >= 1) {
+  	    scope.timer.gameSpeedCounter--;
   	    
-    		$scope.timer.progressCounter++;
-    		while($scope.timer.progressCounter >= $scope.timer.progressMax) {
-    		  $scope.timer.progressCounter -= $scope.timer.progressMax;
-    		  $scope.tickProjectProgress();
+    		scope.timer.progressCounter++;
+    		while(scope.timer.progressCounter >= scope.timer.progressMax) {
+    		  scope.timer.progressCounter -= scope.timer.progressMax;
+    		  scope.tickProjectProgress();
     		}
     
-    		$scope.timer.awarenessCounter++;
-    		while($scope.timer.awarenessCounter >= $scope.timer.awarenessMax) {
-    		  $scope.timer.awarenessCounter -= $scope.timer.awarenessMax;
-    		  $scope.tickGameAwareness();
+    		scope.timer.awarenessCounter++;
+    		while(scope.timer.awarenessCounter >= scope.timer.awarenessMax) {
+    		  scope.timer.awarenessCounter -= scope.timer.awarenessMax;
+    		  scope.tickGameAwareness();
     		}
     
-    		var oldDollar = $scope.curDollar;
-    		if (!$scope.curProject && $scope.curDollar === oldDollar && $scope.games.length > 0 && $scope.curDollar < $scope.tiers[0].cost * 0.1) {
+    		var oldDollar = scope.curDollar;
+    		if (!scope.curProject && scope.curDollar === oldDollar && scope.games.length > 0 && scope.curDollar < scope.tiers[0].cost * 0.1) {
     			$timeout(function() {
-    				$scope.gameOver = true;
-    				$scope.timer.gameSpeed = 0;
+    				scope.gameOver = true;
+    				scope.timer.gameSpeed = 0;
     			}, 2500);
     		}
   	  }
   	},
   
   	tickProjectProgress: function() {
-  		if ($scope.curProject) {
-  			$scope.curProject.progress += 0.1;
-  			if ($scope.curProject.progress >= $scope.curProject.max) {
-  				$scope.games[$scope.curProject.tier];
+  		if (scope.curProject) {
+  			scope.curProject.progress += 0.1;
+  			if (scope.curProject.progress >= scope.curProject.max) {
+  				scope.games[scope.curProject.tier];
   
-  				var investment = $scope.curProject.investment;
-  				var initialSales = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
-  				var performance = $scope.getReleaseProjectPerformance(initialSales, investment);
+  				var investment = scope.curProject.investment;
+  				var initialSales = investment * (1 - scope.variance) + Math.ceil(Math.random() * investment * ((scope.variance) * 2 * scope.roi));
+  				var performance = scope.getReleaseProjectPerformance(initialSales, investment);
   
           initialSales = Math.round(initialSales);
-  				$scope.curDollar += initialSales;
+  				scope.curDollar += initialSales;
   				
   				var game = {
-  					name: $scope.curProject.name,
+  					name: scope.curProject.name,
   					sales: initialSales,
   					recurringSales: 0,
-  					awareness: $scope.curProject.tier.initialAwareness,
+  					awareness: scope.curProject.tier.initialAwareness,
   					releaseSales: initialSales,
-  					releaseAwareness: $scope.curProject.tier.initialAwareness,
+  					releaseAwareness: scope.curProject.tier.initialAwareness,
   					releasePerformance: performance
   				}
   
-  				$scope.games.push(game);
-  				$scope.log.unshift("Your " + $scope.curProject.tier.name + ", " + $scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
-  				$scope.curProject = null;
+  				scope.games.push(game);
+  				scope.log.unshift("Your " + scope.curProject.tier.name + ", " + scope.curProject.name + "  performed " + performance + ", it made $" + initialSales);
+  				scope.curProject = null;
   
   			}
   		}
   	},
   	
   	tickGameAwareness: function() {
-  		if ($scope.games.length > 0 && $scope.recurringSalesOn) {
-  			angular.forEach($scope.games, function(game, index) {
+  		if (scope.games.length > 0 && scope.recurringSalesOn) {
+  			angular.forEach(scope.games, function(game, index) {
   				if (game.awareness > 0) {
   					var recurringsale = game.releaseSales / 20 * game.awareness;
   
-  					$scope.curDollar += recurringsale;
+  					scope.curDollar += recurringsale;
   					game.recurringSales += recurringsale;
   
   					game.awareness -= randDec(0.005,0.015);
@@ -268,9 +268,9 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 
   });
 
-	$scope.initializeTiers();
-	$scope.start();
-	$interval($scope.gameTick, 100);
+	scope.initializeTiers();
+	scope.start();
+	$interval(scope.gameTick, 100);
 	
 	function randInt(min, max) {
 	  if(!min) min = 0;
@@ -285,7 +285,7 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	}
 	
 
-});
+}]);
 
 app.filter('reverse', function() {
   return function(items) {
