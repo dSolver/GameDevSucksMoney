@@ -106,16 +106,19 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 		$scope.name = "";
 		$scope.curTier = tier;
 	}
+	
 	$scope.giveMoney = function(amount){
 		$scope.curDollar += amount;
 		
 		$scope.log.push("dSolver thanks you for thinking about him, and rewarded you with $"+amount);
 	}
-	$scope.setProject = function() {
+	
+	$scope.startProject = function() {
 		$scope.requestName = false;
 		$scope.curProject = {
 			name: $scope.name,
 			tier: $scope.curTier,
+			investment: $scope.curTier.cost,
 			progress: 0,
 			max: $scope.curTier.time
 		}
@@ -123,10 +126,27 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 
 	$scope.boost = function() {
 		var cost = $scope.curProject.tier.cost * 0.1;
-		$scope.curDollar -= cost
+		if($scope.curDollar < cost) {
+		  return false;
+		}
+		
+    var msg = "You spent $" + cost + " to speed up development time, it ";
+		var max = Math.floor($scope.curProject.max / 10);
+		var result = randDec(-max/4, max);
+		if(result >= max/2) {
+		  msg += "went fantastic!";
+		} else if(result >= 0 && result < max/2) {
+		  msg += "went alright.";
+		} else {
+		  msg += "went disastrously.";
+		}
 
-		$scope.log.unshift("You spent $" + cost + " to speed up development time");
-		$scope.curProject.progress += Math.floor($scope.curProject.max / 10);
+		$scope.curProject.progress += result;
+		result = Math.round(result / $scope.curProject.max * 100);
+		msg += " (" + result + "%)";
+		$scope.curDollar -= cost
+		$scope.curProject.investment += cost/2; // managers trying to speed up development isn't as worthwhile
+		$scope.log.unshift(msg);
 	}
 	
 	$scope.changeGameSpeed = function(val) {
@@ -155,6 +175,35 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	  if(!max) max = 1;
 	  return Math.random() * (max - min) + min;
 	}
+	
+	function getReleaseProjectPerformance(initialSales, investment) {
+		var ratio = initialSales / investment;
+		
+		var performances = [
+				"dismally",
+				"pretty bad",
+				"alright",
+				"better than expected",
+				"pretty well",
+				"amazingly"
+		];
+		
+		var performance;
+		if (ratio < 0.5) {
+			performance = performances[0];
+		} else if (ratio < 0.75) {
+			performance = performances[1];
+		} else if (ratio < 1.12) {
+			performance = performances[2];
+		} else if (ratio < 1.4) {
+			performance = performances[3];
+		} else if (ratio < 1.8) {
+			performance = performances[4];
+		} else {
+			performance = performances[5];
+		}
+		return performance;
+	}
 
 	function gameTick() {
 	  $scope.timer.gameSpeedCounter += $scope.timer.gameSpeed;
@@ -170,36 +219,14 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
     			$scope.curProject.progress += 0.1;
     			if ($scope.curProject.progress >= $scope.curProject.max) {
     				$scope.games[$scope.curProject.tier];
-    				var investment = $scope.curProject.tier.cost;
-    
+
+    				var investment = $scope.curProject.investment;
     				var initialSales = investment * (1 - $scope.variance) + Math.ceil(Math.random() * investment * (($scope.variance) * 2 * $scope.roi));
+    				var performance = getReleaseProjectPerformance(initialSales, investment);
     
-    				var ratio = initialSales / investment;
-    				var performances = [
-        				"dismally",
-        				"pretty bad",
-        				"alright",
-        				"better than expected",
-        				"pretty well",
-        				"amazingly"
-    				];
-    				var performance;
-    				if (ratio < 0.5) {
-    					performance = performances[0];
-    				} else if (ratio < 0.75) {
-    					performance = performances[1];
-    				} else if (ratio < 1.12) {
-    					performance = performances[2];
-    				} else if (ratio < 1.4) {
-    					performance = performances[3];
-    				} else if (ratio < 1.8) {
-    					performance = performances[4];
-    				} else {
-    					performance = performances[5];
-    				}
-    				
             initialSales = Math.round(initialSales);
     				$scope.curDollar += initialSales;
+    				
     				var game = {
     					name: $scope.curProject.name,
     					sales: initialSales,
