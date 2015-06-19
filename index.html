@@ -39,9 +39,16 @@
         <button ng-click="start()"> Start</button>
       </div>
     </div>
+    
+    
+    
     <div ng-show="started">
       <div>
         <h4 ng-class="{negative:curDollar < 0}">Money: {{curDollar | currency}}</h4>
+        <button ng-click="changeGameSpeed(0);" ng-show="timer.gameSpeed > 0">Pause</button>
+        <button ng-click="changeGameSpeed(1);" ng-show="timer.gameSpeed !== 1">1x</button>
+        <button ng-click="changeGameSpeed(2);" ng-show="timer.gameSpeed !== 2">2x</button>
+        <button ng-click="changeGameSpeed(4);" ng-show="timer.gameSpeed !== 4">4x</button>
       </div>
       <div ng-hide="requestName">
         <button ng-repeat="tier in tiers" ng-click="makeGame(tier)" ng-disabled="curProject || curDollar < tier.cost*0.1"> Make {{tier.name}} (${{tier.cost}}) </button>
