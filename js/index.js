@@ -1,66 +1,70 @@
 var app = angular.module('app', []);
 
 app.controller("MainCtrl", function($scope, $interval, $timeout) {
-	$scope.curDollar = 1000;
-	$scope.roi = 0.8;
-	$scope.variance = 0.7;
-	$scope.log = [];
-	$scope.games = {};
-
-	$scope.allTiers = [
-		{
-			name: "Indie Game",
-			cost: 1000,
-			time: 20,
-			initialAwareness: 0.2,
-			unlockRequirement: null
-		},
-		{
-			name: "Small Game",
-			cost: 5000,
-			time: 30,
-			initialAwareness: 0.3,
-			unlockRequirement: null
-		},
-		{
-			name: "Medium Game",
-			cost: 20000,
-			time: 100,
-			initialAwareness: 0.4,
-			unlockRequirement: null
-		},
-		{
-			name: "Large Game",
-			cost: 130000,
-			time: 500,
-			initialAwareness: 0.6,
-			unlockRequirement: "cost"
-		},
-		{
-			name: "Epic Game",
-			cost: 2000000,
-			time: 800,
-			initialAwareness: 0.8,
-			unlockRequirement: "cost"
-		},
-		{
-			name: "Legendary Game",
-			cost: 40000000,
-			time: 1200,
-			initialAwareness: 1,
-			unlockRequirement: "success"
-		}
-	];
-	$scope.tiers = [];
-	
-	$scope.timer = {
-	  gameSpeed: 1,
-	  gameSpeedCounter: 0,
-	  awarenessMax: 10,
-	  awarenessCounter: 0,
-	  progressMax: 1,
-	  progressCounter: 0
-	}
+  angular.extend($scope, {
+    curDollar: 1000,
+    roi: 0.8,
+    variance: 0.7,
+    log: [],
+    games: {},
+    allTiers: [
+  		{
+  			name: "Indie Game",
+  			cost: 1000,
+  			time: 20,
+  			initialAwareness: 0.2,
+  			unlockRequirement: null
+  		},
+  		{
+  			name: "Small Game",
+  			cost: 5000,
+  			time: 30,
+  			initialAwareness: 0.3,
+  			unlockRequirement: null
+  		},
+  		{
+  			name: "Medium Game",
+  			cost: 20000,
+  			time: 100,
+  			initialAwareness: 0.4,
+  			unlockRequirement: null
+  		},
+  		{
+  			name: "Large Game",
+  			cost: 130000,
+  			time: 500,
+  			initialAwareness: 0.6,
+  			unlockRequirement: "cost"
+  		},
+  		{
+  			name: "Epic Game",
+  			cost: 2000000,
+  			time: 800,
+  			initialAwareness: 0.8,
+  			unlockRequirement: "cost"
+  		},
+  		{
+  			name: "Legendary Game",
+  			cost: 40000000,
+  			time: 1200,
+  			initialAwareness: 1,
+  			unlockRequirement: "success"
+  		}
+  	],
+    tiers: [],
+    timer: {
+  	  gameSpeed: 1,
+  	  gameSpeedCounter: 0,
+  	  awarenessMax: 10,
+  	  awarenessCounter: 0,
+  	  progressMax: 1,
+  	  progressCounter: 0
+  	},
+  	recurringSalesOn: true,
+  	projects: [],
+  	games: [],
+  	name: ""
+  });
 
 	function initializeTiers() {
 		$scope.tiers = [];
@@ -83,9 +87,6 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	}
 	initializeTiers();
 
-	$scope.recurringSalesOn = true;
-
-	$scope.projects = [];
 	$scope.start = function() {
 	  $scope.curDollar = 4200;
 	  $scope.roi = 0.8;
@@ -94,8 +95,6 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	}
 	$scope.start();
 
-	$scope.games = [];
-	$scope.name = "";
 	$scope.makeGame = function(tier) {
 		if($scope.curDollar < tier.cost) {
 			return false;
@@ -153,8 +152,6 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
 	  $scope.timer.gameSpeed = val;
 	}
 
-	$scope.teams = [];
-	
 	$scope.boostAwareness = function(game){
 		$scope.curDollar -= Math.round(game.sales/3);
 		game.awareness += randInt(10, 50)/100;
@@ -226,6 +223,7 @@ app.controller("MainCtrl", function($scope, $interval, $timeout) {
   		if (!$scope.curProject && $scope.curDollar === oldDollar && $scope.games.length > 0 && $scope.curDollar < $scope.tiers[0].cost * 0.1) {
   			$timeout(function() {
   				$scope.gameOver = true;
+  				$scope.timer.gameSpeed = 0;
   			}, 2500);
   		}
 	  }
